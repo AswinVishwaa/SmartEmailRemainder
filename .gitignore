@@ -1,0 +1,17 @@
+# Environment and IDE
+.env
+.vscode/
+__pycache__/
+__pylance__/
+
+# Credentials / Secrets
+credentials.json
+token.json
+
+# Evaluation / temporary folders
+evaluation/
+evalution/
+
+# OS / System files
+.DS_Store
+Thumbs.db
