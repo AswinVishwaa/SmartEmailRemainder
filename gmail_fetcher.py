@@ -8,7 +8,11 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from email import message_from_bytes
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+# Updated scopes to include sending permissions
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.send'
+]
 
 def authenticate_gmail():
     creds = None
@@ -44,6 +48,12 @@ def fetch_emails(n=3):
         from_email = mime_msg.get('From', '')
         payload = mime_msg.get_payload()
         
+        # Get Message-ID and Thread-ID for threading replies
+        msg_id = msg['id']
+        thread_id = msg['threadId']
+        # Also try to get the actual Message-ID header (useful for In-Reply-To)
+        internet_message_id = mime_msg.get('Message-ID', '')
+
         body = ""
         if mime_msg.is_multipart():
             for part in mime_msg.walk():
@@ -55,6 +65,9 @@ def fetch_emails(n=3):
         
         if body.strip():
             emails.append({
+                'id': msg_id,
+                'threadId': thread_id,
+                'internet_message_id': internet_message_id,
                 'subject': subject,
                 'from': from_email,
                 'body': body

@@ -8,14 +8,16 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-def generate_reply(email_text, tone="positive"):
+def generate_reply(email_text, instruction="Reply professionally"):
     prompt = f"""
 You are an assistant that helps generate polite email replies.
 
 Original email:
 \"\"\"{email_text}\"\"\"
 
-Write a professional, {tone}-toned reply to this email.
+User Instruction: "{instruction}"
+
+Write a professional email reply based on the user's instruction. Do not include placeholders like "[Your Name]". just the body.
 """
 
     headers = {

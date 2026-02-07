@@ -1,0 +1,12 @@
+flask
+requests
+python-dotenv
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+schedule
+sqlalchemy
+psycopg2-binary
+google-generativeai
+twilio
+python-dateutil

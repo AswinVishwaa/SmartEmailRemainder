@@ -4,7 +4,21 @@ from whatsapp_bot import send_whatsapp_message, TO_WHATSAPP
 import time
 from context_store import load_context, save_context
 
+from models import init_db
+import threading
+from scheduler import start_scheduler
+from googleapiclient.discovery import build # Explicit import to ensure it works
+
 def main():
+    # Initialize Database
+    init_db()
+    print("✅ Database initialized.")
+
+    # Start Scheduler in Background
+    schedule_thread = threading.Thread(target=start_scheduler, daemon=True)
+    schedule_thread.start()
+    print("🕒 Scheduler started in background...")
+
     print("📬 Fetching latest emails...")
     emails = fetch_emails(4)
     sender_number = TO_WHATSAPP.replace("whatsapp:", "")
@@ -35,7 +49,12 @@ def main():
             "title": parsed.get("title", ""),
             "deadline": parsed.get("deadline", ""),
             "action": parsed.get("action", ""),
-            "original_body": body
+            "original_body": body,
+            "id": email.get("id"),
+            "threadId": email.get("threadId"),
+            "internet_message_id": email.get("internet_message_id"),
+            "from": email.get("from"),
+            "subject": email.get("subject")
         }
 
         time.sleep(1.2)
