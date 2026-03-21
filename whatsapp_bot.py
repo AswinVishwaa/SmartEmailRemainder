@@ -79,6 +79,6 @@ def send_via_meta(body, to_number):
     
     res = requests.post(url, headers=headers, json=payload)
     if res.status_code == 200:
-        print(f"✅ Meta Message sent!")
+        print(f"✅ Meta Message sent (Accepted by API): {res.json()}")
     else:
-        print(f"❌ Meta Error: {res.text}")
+        print(f"❌ Meta API Error: {res.status_code} - {res.text}")

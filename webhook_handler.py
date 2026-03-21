@@ -44,6 +44,13 @@ def whatsapp_reply():
                 msg = entry['messages'][0]
                 incoming_msg = msg['text']['body']
                 sender = msg['from'] # Meta returns pure number e.g. "1555000"
+            elif 'statuses' in entry:
+                status = entry['statuses'][0]
+                if 'statuses' in status and status.get('status') == 'failed':
+                    pass # handled below
+                if status.get('status') == 'failed' or 'errors' in status:
+                    print(f"❌ Meta Delivery Error: {status.get('errors')}")
+                return "OK", 200
             else:
                 return "OK", 200 # Status update (read/delivered), ignore
         except:

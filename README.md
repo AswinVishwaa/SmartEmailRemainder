@@ -102,3 +102,45 @@ Notes:
 If you'd like, I can also:
 - Add a `docker-compose.yml` for a local Postgres + app setup.
 - Create a minimal `ngrok` example and Twilio webhook setup steps.
+
+**Correct Run Flow (tested)**
+
+The following is the exact flow tested on this machine — add these to your run checklist or follow them in order when starting the service:
+
+1. In Terminal A: start ngrok to expose the local webhook port
+
+```powershell
+ngrok http 5000
+```
+
+2. In Terminal B: start the webhook server (Flask)
+
+```powershell
+python webhook_handler.py
+# or
+python -c "from webhook_handler import app; app.run(host='0.0.0.0', port=5000)"
+```
+
+3. In your browser: open Meta Cloud (or Twilio console) and configure the webhook callback to the ngrok HTTPS URL. Set the verify token to match `META_VERIFY_TOKEN` in your `.env` or environment.
+
+4. Generate or confirm the webhook verification token in Meta Cloud and set the phone number (WhatsApp) to send/receive messages.
+
+5. (Optional) Use `instant_poll.py` for an immediate/manual search/poll run
+
+```powershell
+python instant_poll.py
+```
+
+6. For continuous monitoring and scheduled polling, run the main processor
+
+```powershell
+python main.py
+```
+
+7. To free/clear the indexed context (reset in-memory or JSON index), run the clear cache helper
+
+```powershell
+python clear_cache.py
+```
+
+These steps reflect the verified, working flow: ngrok in one terminal, webhook server in another, Meta Cloud configured to the ngrok URL, token set, use `instant_poll.py` for instant checks, `main.py` for continuous monitoring, and `clear_cache.py` to reset the index.
