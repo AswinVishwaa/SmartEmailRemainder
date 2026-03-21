@@ -103,44 +103,49 @@ If you'd like, I can also:
 - Add a `docker-compose.yml` for a local Postgres + app setup.
 - Create a minimal `ngrok` example and Twilio webhook setup steps.
 
-**Correct Run Flow (tested)**
+**Correct Run Flow (updated with Meta API setup)**
 
-The following is the exact flow tested on this machine — add these to your run checklist or follow them in order when starting the service:
+Follow these step-by-step instructions to run and test the application, specifically for the Meta WhatsApp Cloud API:
 
-1. In Terminal A: start ngrok to expose the local webhook port
+1. **Start the Webhook Server** (Terminal 1)
+```powershell
+python run.py
+```
+*(This starts the Flask app, usually on port 5000.)*
 
+2. **Expose the Local Webhook to the Internet** (Terminal 2)
 ```powershell
 ngrok http 5000
 ```
+*(Copy the `Forwarding` HTTPS URL output by ngrok, e.g., `https://<your-ngrok-url>.ngrok-free.app`)*
 
-2. In Terminal B: start the webhook server (Flask)
+3. **Configure Meta Cloud API** (WhatsApp Setup)
+- Go to the **Meta App Dashboard** -> **WhatsApp** -> **Configuration**.
+- Under Webhook, click **Edit**.
+- **Callback URL:** Paste your ngrok URL and add `/whatsapp` to the end (e.g., `https://<your-ngrok-url>.ngrok-free.app/whatsapp`).
+- **Verify Token:** Enter your secret token (matches `META_VERIFY_TOKEN` in your `.env`, e.g., `mysecrettoken`).
+- Click **Verify and save**.
+- **Crucial:** Click **Manage** next to Webhook fields and subscribe to the `messages` event. 
 
-```powershell
-python webhook_handler.py
-# or
-python -c "from webhook_handler import app; app.run(host='0.0.0.0', port=5000)"
-```
+4. **Bypass the 24-Hour Rule (Customer Service Window)**
+- In the Meta Dashboard, go to **API Setup**.
+- Under "Send and receive messages", click **Send Message** to your test number (or just send a message from your phone).
+- **CRITICAL TEST STEP:** Open WhatsApp on your mobile phone and send a message (like "Hi") *to* the bot's phone number. This opens a 24-hour "customer service window". Without this, Meta will silently block outbound text messages to your phone and return an error in the webhook logs!
 
-3. In your browser: open Meta Cloud (or Twilio console) and configure the webhook callback to the ngrok HTTPS URL. Set the verify token to match `META_VERIFY_TOKEN` in your `.env` or environment.
-
-4. Generate or confirm the webhook verification token in Meta Cloud and set the phone number (WhatsApp) to send/receive messages.
-
-5. (Optional) Use `instant_poll.py` for an immediate/manual search/poll run
-
+5. **Test Polling for New Emails** (Terminal 3)
 ```powershell
 python instant_poll.py
 ```
+*(This will manually check for new emails, process them, and send the WhatsApp notification to your phone. Check your phone to see if the message arrived!)*
 
-6. For continuous monitoring and scheduled polling, run the main processor
-
-```powershell
-python main.py
-```
-
-7. To free/clear the indexed context (reset in-memory or JSON index), run the clear cache helper
-
+6. **Resetting for Another Test** (Terminal 3)
 ```powershell
 python clear_cache.py
 ```
+*(Run this to delete existing processed records and clear the cache. This allows you to test `instant_poll.py` again with the same emails as if they were new.)*
 
-These steps reflect the verified, working flow: ngrok in one terminal, webhook server in another, Meta Cloud configured to the ngrok URL, token set, use `instant_poll.py` for instant checks, `main.py` for continuous monitoring, and `clear_cache.py` to reset the index.
+7. **Run Continuously**
+For continuous monitoring and scheduled polling in the background, run:
+```powershell
+python main.py
+```
